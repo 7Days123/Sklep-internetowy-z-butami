@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twój koszyk - ShoesLab</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <h1>ShoesLab</h1>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">Sklep</a>
+            <a href="cart.html" class="nav-link active">Koszyk</a>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="cart-section">
+            <h1>Koszyk</h1>
+            
+            <div id="cart-wrapper">
+            </div>
+            
+            <div id="cart-total" class="cart-total" style="display: none;">
+                <h2>Podsumowanie</h2>
+                <div class="cart-summary">
+                    <span>Razem do zapłaty:</span>
+                    <span id="total-price" class="total-price">0,00 zł</span>
+                </div>
+                <a href="checkout.html" class="btn-primary">Przejdź do kasy</a>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+        });
+        
+        function renderCart() {
+            const items = cart.getCartItems(products);
+            
+            const wrapper = document.getElementById('cart-wrapper');
+            
+            if (items.length === 0) {
+                wrapper.innerHTML = `
+                    <div class="empty-cart">
+                        <h3>Twój koszyk świeci pustkami :(</h3>
+                        <p>Dodaj jakieś buty, zanim przejdziesz do kasy.</p>
+                        <a href="index.html" class="btn-primary" style="margin-top: 15px; display: inline-block;">Wracam do sklepu</a>
+                    </div>
+                `;
+                document.getElementById('cart-total').style.display = 'none';
+                return;
+            }
+            
+            wrapper.innerHTML = `
+                <table class="cart-table">
+                    <thead>
+                        <tr>
+                            <th>Produkt</th>
+                            <th>Rozmiar</th>
+                            <th>Kolor</th>
+                            <th>Ilość</th>
+                            <th>Cena</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map(item => `
+                            <tr>
+                                <td><strong>${item.product.name}</strong></td>
+                                <td>${item.size}</td>
+                                <td>${item.color.charAt(0).toUpperCase() + item.color.slice(1)}</td>
+                                <td>
+                                    <input type="number" value="${item.quantity}" 
+                                           min="1" max="${item.product.stock}"
+                                           data-key="${Object.keys(cart.cart)[items.indexOf(item)]}"
+                                           class="quantity-input" style="width: 60px;">
+                                </td>
+                                <td>${(item.product.price * item.quantity).toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}</td>
+                                <td>
+                                    <button class="btn-danger remove-btn" data-key="${Object.keys(cart.cart)[items.indexOf(item)]}">Usuń</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const key = e.target.dataset.key;
+                    let qty = parseInt(e.target.value);
+                    
+                    if(qty < 1) qty = 1;
+                    
+                    cart.updateQuantity(key, qty);
+                    renderCart();
+                });
+            });
+            
+            document.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const key = e.target.dataset.key;
+                    console.log('Usuwam element:', key);
+                    cart.removeItem(key);
+                    renderCart();
+                });
+            });
+            
+            const total = cart.getTotalValue(products);
+            document.getElementById('total-price').textContent = total.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+            document.getElementById('cart-total').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

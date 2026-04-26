@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sklep z obuwiem - ShoesLab</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <h1>ShoesLab</h1>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link active">Sklep</a>
+            
+            <button class="login-btn" onclick="openAuthModal()">Zaloguj / Rejestruj</button>
+            
+            <a href="cart.html" class="nav-link" id="cart-count">
+                Koszyk <span class="badge" id="cart-badge">0</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="products-section">
+            <div class="section-header">
+                <h1>Katalog produktów</h1>
+                
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Szukaj (np. Adidas, sneakersy)..." class="search-input">
+                    <button class="search-btn" id="search-btn" aria-label="Szukaj">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="filters">
+                    <button class="filter-btn active" data-category="all">Wszystkie</button>
+                    <button class="filter-btn" data-category="damskie">Damskie</button>
+                    <button class="filter-btn" data-category="męskie">Męskie</button>
+                    <button class="filter-btn" data-category="dziecięce">Dziecięce</button>
+                </div>
+            </div>
+
+            <div class="products-grid" id="products-grid">
+                </div>
+        </section>
+    </main>
+
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="switchTab('login')">Zaloguj</button>
+                <button class="tab-btn" onclick="switchTab('register')">Zarejestruj</button>
+            </div>
+            
+            <form id="loginForm" class="auth-form active">
+                <h3>Zaloguj się</h3>
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Hasło" required>
+                <button type="submit">Zaloguj się</button>
+                <p class="error" id="loginError"></p>
+            </form>
+            
+            <form id="registerForm" class="auth-form">
+                <h3>Załóż konto</h3>
+                <input type="text" id="regName" placeholder="Imię i nazwisko" required>
+                <input type="email" id="regEmail" placeholder="Email" required>
+                <input type="password" id="regPassword" placeholder="Hasło (min. 6 znaków)" required>
+                <input type="password" id="regConfirmPassword" placeholder="Powtórz hasło" required>
+                <button type="submit">Zarejestruj się</button>
+                <p class="error" id="regError"></p>
+            </form>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <p>&copy; 2026 ShoesLab - Jan Kowalski (projekt zaliczeniowy)</p>
+    </footer>
+
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>

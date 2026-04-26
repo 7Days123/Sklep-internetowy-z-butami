@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zamówienie - ShoesLab</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .order-summary { background: #f8fafc; padding: 1.5rem; border-radius: 0.75rem; margin: 2rem 0; }
+        .order-item { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0; }
+        .total-row { display: flex; justify-content: space-between; padding: 0.75rem 0; font-weight: 600; }
+        .total-row.final { border-top: 2px solid var(--primary); margin-top: 0.5rem; font-size: 1.2rem; }
+        .checkbox-group { display: flex; align-items: flex-start; gap: 0.5rem; margin: 1.5rem 0; font-size: 0.9rem; }
+        .error, .loading { text-align: center; padding: 3rem; font-size: 1.2rem; color: var(--text-light); }
+        .empty-cart { text-align: center; padding: 3rem; background: white; border-radius: 1rem; box-shadow: var(--shadow); }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <h1>ShoesLab</h1>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">Sklep</a>
+            <a href="cart.html" class="nav-link">Koszyk</a>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="checkout-section">
+            <div class="checkout-form">
+                <h1>Finalizacja zamówienia</h1>
+                <p>Wypełnij formularz, aby złożyć zamówienie.</p>
+                
+                <form id="checkout-form" novalidate>
+                    <div class="form-group">
+                        <label for="customer-name">Imię i nazwisko *</label>
+                        <input type="text" id="customer-name" name="name" required pattern="[A-Za-zĄ-Żą-ż\s]{2,}" title="Minimum 2 litery">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer-email">E-mail *</label>
+                        <input type="email" id="customer-email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="customer-phone">Telefon</label>
+                        <input type="tel" id="customer-phone" name="phone" pattern="[+]?[0-9]{9,15}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delivery-address">Adres dostawy *</label>
+                        <textarea id="delivery-address" name="address" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="delivery-method">Dostawa</label>
+                            <select id="delivery-method" name="delivery" required>
+                                <option value="">Wybierz metodę</option>
+                                <option value="kurier">Kurier (15 zł)</option>
+                                <option value="paczkomat">Paczkomat (12 zł)</option>
+                                <option value="odbior">Odbiór osobisty (0 zł)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="payment-method">Płatność</label>
+                            <select id="payment-method" name="payment" required>
+                                <option value="">Wybierz metodę</option>
+                                <option value="blik">BLIK</option>
+                                <option value="przelew">Przelew online</option>
+                                <option value="pobranie">Płatność przy odbiorze</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="order-summary">
+                        <h3>Twoje zamówienie:</h3>
+                        <div id="order-items"></div>
+                        <div class="total-row">
+                            <span>Kwota:</span>
+                            <span id="order-total">0,00 zł</span>
+                        </div>
+                        <div class="total-row final">
+                            <span>Do zapłaty:</span>
+                            <strong id="final-total">0,00 zł</strong>
+                        </div>
+                    </div>
+                    
+                    <label class="checkbox-group">
+                        <input type="checkbox" id="terms" required>
+                        <span>Akceptuję regulamin i politykę prywatności</span>
+                    </label>
+                    
+                    <button type="submit" class="btn-primary">Kupuję i płacę</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Init checkout init...');
+            renderOrderSummary();
+            
+            document.getElementById('checkout-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const termsCheckbox = document.getElementById('terms');
+                if (!termsCheckbox.checked) {
+                    alert('Musisz zaakceptować regulamin, żeby kontynuować!');
+                    return;
+                }
+                
+
+                console.log('Dane zamówienia poprawne. Wysyłam do bazy...');
+                alert('Dzięki za zamówienie! (Wersja demo - wyczyści koszyk)');
+                
+                cart.clearCart();
+                window.location.href = 'index.html';
+            });
+        });
+        
+        function renderOrderSummary() {
+            const items = cart.getCartItems(products);
+            const container = document.getElementById('order-items');
+            const total = cart.getTotalValue(products);
+            
+            if (items.length === 0) {
+                container.innerHTML = '<p>Pusto tutaj. Wrzuć coś do koszyka najpierw.</p>';
+                return;
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="order-item">
+                    <span>${item.product.name} (Rozm. ${item.size}, ${item.color})</span>
+                    <span>x${item.quantity}</span>
+                </div>
+            `).join('');
+            
+            const formattedTotal = total.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
+            
+            document.getElementById('order-total').textContent = formattedTotal;
+            document.getElementById('final-total').textContent = formattedTotal;
+        }
+    </script>
+</body>
+</html>

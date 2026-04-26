@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Szczegóły - ShoesLab</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <h1>ShoesLab</h1>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">Sklep</a>
+            <a href="cart.html" class="nav-link" id="cart-count-product">
+                Koszyk <span class="badge" id="cart-badge-product">0</span>
+            </a>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="product-detail" id="product-detail">
+            <div class="loading">Ładuję dane produktu...</div>
+        </section>
+    </main>
+
+    <script src="assets/js/products.js"></script>
+    <script src="assets/js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            const idParam = params.get('id');
+            const productId = parseInt(idParam);
+            
+            console.log('Sprawdzam produkt ID:', productId);
+            
+            if (!idParam || isNaN(productId)) {
+                document.getElementById('product-detail').innerHTML = '<div class="error">Brak ID w adresie URL.</div>';
+                return;
+            }
+
+            const prod = products.find(p => p.id === productId);
+            
+            if (!prod) {
+                console.error('Nie znaleziono produktu w bazie!');
+                document.getElementById('product-detail').innerHTML = 
+                    '<div class="error">Ups, taki produkt nie istnieje. <a href="index.html">Wróć do sklepu</a></div>';
+                return;
+            }
+            
+            renderView(prod);
+            cart.updateCartCount();
+        });
+        
+        function renderView(product) {
+            document.getElementById('product-detail').innerHTML = `
+                <div class="product-main-image">
+                    <img src="${product.image}" alt="${product.name}">
+                </div>
+                <div class="product-details">
+                    <h1>${product.name}</h1>
+                    <div class="product-brand" style="color: #666; font-size: 0.9em; margin-bottom: 10px;">${product.brand}</div>
+                    
+                    <div class="product-price" style="font-size: 1.5em; font-weight: bold; margin-bottom: 20px;">
+                        ${product.price.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' })}
+                    </div>
+                    
+                    <p class="product-description">${product.description}</p>
+                    
+                    <div class="stock-info" style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+                        <strong>Rozmiarówka:</strong> ${product.sizes.join(', ')}<br>
+                        <strong>Kolory:</strong> ${product.colors.join(', ')}<br>
+                        <span style="color: ${product.stock < 5 ? 'red' : 'green'}">Zostało sztuk: ${product.stock}</span>
+                    </div>
+                    
+                    <form id="addForm" class="add-to-cart-form">
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="p-size">Rozmiar</label>
+                                <select id="p-size" required>
+                                    <option value="">-- wybierz --</option>
+                                    ${product.sizes.map(s => `<option value="${s}">${s}</option>`).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="flex: 1;">
+                                <label for="p-color">Kolor</label>
+                                <select id="p-color" required>
+                                    <option value="">-- wybierz --</option>
+                                    ${product.colors.map(c => `<option value="${c}">${c}</option>`).join('')}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="width: 80px;">
+                                <label for="p-qty">Ilość</label>
+                                <input type="number" id="p-qty" min="1" max="${product.stock}" value="1">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" style="width: 100%;">Do koszyka</button>
+                    </form>
+                    
+                    <div style="margin-top: 2rem;">
+                        <a href="index.html" class="btn-secondary" style="text-decoration: none;">&larr; Wróć do listy</a>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('addForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const size = document.getElementById('p-size').value;
+                const color = document.getElementById('p-color').value;
+                const qty = parseInt(document.getElementById('p-qty').value);
+                
+                if (!size || !color) {
+                    alert('Ej, zapomniałeś wybrać rozmiar lub kolor!');
+                    return;
+                }
+                
+                console.log(`Dodaję do koszyka: ID ${product.id}, Rozmiar ${size}, Kolor ${color}, Ilość ${qty}`);
+                cart.addItem(product.id, size, color, qty);
+                
+                alert('Pomyślnie dodano do koszyka!');
+                
+                document.getElementById('addForm').reset();
+            });
+        }
+    </script>
+</body>
+</html>
